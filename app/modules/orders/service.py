@@ -29,10 +29,10 @@ class OrderService:
 
         item = self.repository.get_menu_item_by_id(item_id)
         if not item:
-            raise NotFoundError("Указанное блюдо не найдено в меню")
+            raise NotFoundError("Блюдо не найдено")
 
         if not item.is_available:
-            raise ValueError("Блюдо временно недоступно")
+            raise ValueError("Блюдо недоступно")
 
         total_cost = item.price * quantity
         if user.balance < total_cost:
