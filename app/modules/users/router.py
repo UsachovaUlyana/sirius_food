@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas import UserCreate
-from app.modules.users.repository import UserRepository
+from app.modules.users.repository import get_repository
 from app.modules.users.service import UserService, NotFoundError, ForbiddenError
 
 router = APIRouter()
@@ -17,7 +17,7 @@ def register_user(payload: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Некорректный формат номера телефона")
 
     # Сборка архитектурных слоёв.
-    service = UserService(UserRepository(db))
+    service = UserService(get_repository(db))
 
     try:
         result = service.register_user(payload.email, payload.phone)
@@ -33,7 +33,7 @@ def top_up_balance(user_id: int, amount: float, db: Session = Depends(get_db)):
     if amount <= 0:
         raise HTTPException(status_code=400, detail="Сумма пополнения должна быть положительной")
 
-    service = UserService(UserRepository(db))
+    service = UserService(get_repository(db))
 
     try:
         new_balance = service.top_up_balance(user_id, amount)

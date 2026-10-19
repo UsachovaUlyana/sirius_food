@@ -1,47 +1,27 @@
 """
 Unit-тесты слоя бизнес-логики users/service.py (без СУБД и веб-сервера).
+Вместо PostgreSQL используется InMemoryUserRepository.
 """
-from types import SimpleNamespace
-
 import pytest
 
+from app.modules.users.repository import InMemoryUserRepository
 from app.modules.users.service import UserService, NotFoundError, ForbiddenError
 
 
-class FakeUserRepository:
-    def __init__(self):
-        self.users = {}
-
-    def get_user_by_id(self, user_id):
-        return self.users.get(user_id)
-
-    def get_user_by_email(self, email):
-        return next((u for u in self.users.values() if u.email == email), None)
-
-    def save_user(self, email, phone):
-        user = SimpleNamespace(id=len(self.users) + 1, email=email, phone=phone,
-                               balance=0.0, is_blocked=False)
-        self.users[user.id] = user
-        return user
-
-    def update_user_balance(self, user, new_balance):
-        user.balance = new_balance
-
-
 def test_register_user_success():
-    service = UserService(FakeUserRepository())
+    service = UserService(InMemoryUserRepository())
     assert service.register_user("a@b.ru", None) == {"user_id": 1, "email": "a@b.ru"}
 
 
 def test_register_user_duplicate_email():
-    service = UserService(FakeUserRepository())
+    service = UserService(InMemoryUserRepository())
     service.register_user("a@b.ru", None)
     with pytest.raises(ValueError, match="уже зарегистрирован"):
         service.register_user("a@b.ru", None)
 
 
 def test_top_up_success():
-    repo = FakeUserRepository()
+    repo = InMemoryUserRepository()
     service = UserService(repo)
     service.register_user("a@b.ru", None)
     assert service.top_up_balance(1, 100) == 100
@@ -50,11 +30,11 @@ def test_top_up_success():
 
 def test_top_up_user_not_found():
     with pytest.raises(NotFoundError):
-        UserService(FakeUserRepository()).top_up_balance(1, 100)
+        UserService(InMemoryUserRepository()).top_up_balance(1, 100)
 
 
 def test_top_up_blocked_user():
-    repo = FakeUserRepository()
+    repo = InMemoryUserRepository()
     service = UserService(repo)
     service.register_user("a@b.ru", None)
     repo.users[1].is_blocked = True
@@ -63,7 +43,7 @@ def test_top_up_blocked_user():
 
 
 def test_top_up_over_limit():
-    repo = FakeUserRepository()
+    repo = InMemoryUserRepository()
     service = UserService(repo)
     service.register_user("a@b.ru", None)
     with pytest.raises(ValueError, match="50000"):

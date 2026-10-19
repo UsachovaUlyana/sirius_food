@@ -1,5 +1,5 @@
 # users/service.py
-from app.modules.users.repository import UserRepository
+from app.modules.users.repository import AbstractUserRepository
 
 MAX_TOP_UP = 50000
 
@@ -18,7 +18,7 @@ class UserService:
     Не имеет зависимостей от инфраструктурных фреймворков.
     """
 
-    def __init__(self, repository: UserRepository):
+    def __init__(self, repository: AbstractUserRepository):
         # Внедрение зависимости через конструктор.
         self.repository = repository
 
