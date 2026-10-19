@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas import OrderCreate
-from app.modules.orders.repository import OrderRepository
+from app.modules.orders.repository import get_repository
 from app.modules.orders.service import OrderService, NotFoundError
 
 router = APIRouter()
@@ -16,7 +16,7 @@ def create_order(payload: OrderCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Количество должно быть больше нуля")
 
     # Сборка архитектурных слоёв.
-    repository = OrderRepository(db)
+    repository = get_repository(db)
     service = OrderService(repository)
 
     # Делегирование выполнения сценария слою бизнес-логики.

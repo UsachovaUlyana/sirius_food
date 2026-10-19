@@ -1,5 +1,5 @@
 # orders/service.py
-from app.modules.orders.repository import OrderRepository
+from app.modules.orders.repository import AbstractOrderRepository
 
 
 class NotFoundError(ValueError):
@@ -13,7 +13,7 @@ class OrderService:
     Не имеет зависимостей от инфраструктурных фреймворков.
     """
 
-    def __init__(self, repository: OrderRepository):
+    def __init__(self, repository: AbstractOrderRepository):
         # Внедрение зависимости через конструктор.
         self.repository = repository
 
